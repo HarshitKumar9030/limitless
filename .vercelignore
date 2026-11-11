@@ -1,0 +1,4 @@
+# The Python desktop prototype isn't part of the website
+*.py
+requirements.txt
+assets/
