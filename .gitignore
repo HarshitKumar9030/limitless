@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+selftest_out/
+# regenerated / downloaded by the Python app
+assets/charge.wav
+assets/blast.wav
+assets/hand_landmarker.task

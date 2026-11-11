@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Limitless</title>
+<meta name="description" content="Cast Hollow Purple and Reversal: Red with your hands - webcam hand tracking in the browser. Made by Harshit.">
+<meta name="author" content="Harshit">
+<meta name="theme-color" content="#08070b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08070b; --fg: #f4f2f7; --muted: #a39fae; --dim: #6c6878;
+    --purple: #a855f7; --red: #ef4444;
+    --glass: rgba(255, 255, 255, 0.06); --glass-strong: rgba(255, 255, 255, 0.1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font-family: Inter, system-ui, sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  #view { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; object-fit: cover; display: block; }
+
+  /* ---------- liquid glass: flat tint + blur, no borders, shadows or gradients ---------- */
+  .glass {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+  .liquid .glass { backdrop-filter: url(#liquid) blur(18px) saturate(180%); }
+
+  /* ---------- landing ---------- */
+  #start { position: fixed; inset: 0; z-index: 5; overflow-y: auto; }
+  #bg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .wrap { position: relative; z-index: 1; min-height: 100%; display: grid; grid-template-rows: auto 1fr auto;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    max-width: 1120px; margin: 0 auto; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px 9px 12px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--purple); }
+  .brand small { font-family: "Shippori Mincho", serif; color: var(--muted); font-weight: 700; }
+  .by { font-size: 13px; color: var(--muted); padding: 9px 16px; border-radius: 999px; text-decoration: none;
+    transition: background 0.2s, color 0.2s; }
+  .by b { color: var(--fg); font-weight: 600; }
+  .by:hover { background: var(--glass-strong); color: var(--fg); }
+
+  .hero { display: grid; align-content: center; justify-items: center; text-align: center; padding: 40px 0 24px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: var(--muted);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 22px; }
+  .eyebrow i { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .title { margin: 0; font-weight: 700; letter-spacing: -0.055em; line-height: 0.95;
+    font-size: clamp(56px, 12vw, 128px); color: var(--fg); }
+  .jp { font-family: "Shippori Mincho", serif; font-size: clamp(15px, 2.4vw, 19px); color: var(--muted);
+    letter-spacing: 0.45em; margin: 16px 0 0; padding-left: 0.45em; }
+  .tag { color: var(--muted); font-size: clamp(15px, 1.8vw, 17px); margin: 14px 0 34px; max-width: 460px; line-height: 1.5; }
+
+  .moves { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: min(760px, 100%); text-align: left; }
+  @media (max-width: 640px) { .moves { grid-template-columns: 1fr; } }
+  .move { border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 14px;
+    transition: background 0.25s, transform 0.25s; }
+  .move:hover { background: var(--glass-strong); transform: translateY(-2px); }
+  .move .head { display: flex; align-items: center; justify-content: space-between; }
+  .orb { width: 36px; height: 36px; border-radius: 50%; position: relative; animation: pulse 2.6s ease-in-out infinite; }
+  .orb::after { content: ""; position: absolute; inset: 11px; border-radius: 50%; background: #fff; }
+  .orb.p { background: var(--purple); } .orb.r { background: var(--red); }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  .kanji { font-family: "Shippori Mincho", serif; font-size: 15px; color: var(--muted); }
+  .move h3 { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+  .move p { margin: 6px 0 0; font-size: 14px; color: var(--muted); line-height: 1.55; }
+  .chip { align-self: flex-start; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 999px; background: var(--glass-strong); color: var(--fg); }
+
+  .cta { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 26px; }
+  .btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btns button { font: 600 15px Inter, sans-serif; border: 0; border-radius: 999px; padding: 15px 26px; cursor: pointer;
+    letter-spacing: -0.01em; transition: transform 0.2s, background 0.2s; }
+  .btns .primary { color: #0b0a0f; background: #fff; }
+  .btns .primary:hover { background: #e9e6ee; }
+  .btns .glass { color: var(--fg); }
+  .btns .glass:hover { background: var(--glass-strong); }
+  .btns button:hover { transform: translateY(-1px); }
+  .btns button:disabled { opacity: 0.7; cursor: wait; transform: none; }
+
+  .lbl { display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .xp { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.12); overflow: hidden; margin-top: 8px; }
+  .xp i { display: block; height: 100%; width: 0; background: var(--purple); border-radius: 2px; transition: width 0.5s; }
+
+  .stats { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 10px; width: min(760px, 100%); margin-top: 28px; text-align: left; }
+  @media (max-width: 640px) { .stats { grid-template-columns: 1fr 1fr; } .stats .grade { grid-column: 1 / -1; } }
+  .stat { border-radius: 18px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 22px; font-weight: 600; letter-spacing: -0.03em; margin-top: 4px; }
+  .stat .sub { font-size: 12px; color: var(--dim); display: block; margin-top: 6px; }
+  .ach summary { list-style: none; cursor: pointer; }
+  .ach summary::-webkit-details-marker { display: none; }
+  .ach[open] { grid-column: 1 / -1; }
+  .ach ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .ach li { padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.04); opacity: 0.45; }
+  .ach li.got { opacity: 1; background: rgba(168,85,247,0.16); }
+  .ach li b { font-size: 13px; margin: 0; letter-spacing: -0.01em; }
+  .ach li span { font-size: 12px; color: var(--muted); }
+  #err { color: #fca5a5; font-size: 14px; min-height: 1em; }
+
+  footer { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap;
+    font-size: 12px; color: var(--dim); }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--fg); }
+  @media (max-width: 640px) { footer { justify-content: center; text-align: center; } }
+
+  /* ---------- in-app HUD ---------- */
+  #hud { position: fixed; left: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 2;
+    padding: 12px 16px; border-radius: 16px; font-size: 14px; max-width: calc(100vw - 32px); pointer-events: none; }
+  #bar { width: min(300px, 70vw); height: 4px; border-radius: 2px; background: rgba(255,255,255,0.14); margin-top: 9px; overflow: hidden; display: none; }
+  #bar i { display: block; height: 100%; width: 0; background: var(--purple); border-radius: 2px; }
+  #keys { position: fixed; top: 16px; right: 16px; font-size: 12px; color: #ffffffcc; z-index: 2; padding: 8px 14px; border-radius: 999px; }
+  #tests { position: fixed; top: 14px; left: 14px; display: flex; gap: 8px; z-index: 2; }
+  #tests button { font: 600 12px Inter, sans-serif; color: #fff; border: 0; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+  #credit { position: fixed; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 2; font-size: 12px;
+    color: #ffffffcc; text-decoration: none; padding: 8px 14px; border-radius: 999px; }
+  #menuBtn { position: fixed; top: 14px; right: 16px; z-index: 3; font: 600 12px Inter, sans-serif; color: #fff; border: 0;
+    border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+  #keys { right: 90px; }
+
+  #ghud { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 2; display: flex; gap: 8px; }
+  .gbox { border-radius: 16px; padding: 10px 16px; min-width: 120px; }
+  .gbox b { display: block; font-size: 24px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .gbox.mid { text-align: center; }
+  #gLives { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+  #gLives i { width: 22px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.15); }
+  #gLives i.on { background: #93c5fd; }
+  @media (max-width: 640px) { #ghud { top: 58px; } .gbox { min-width: 0; padding: 8px 12px; } .gbox b { font-size: 18px; } }
+
+  #toast { position: fixed; top: 96px; left: 50%; z-index: 4; border-radius: 18px; padding: 14px 20px; text-align: center;
+    transform: translate(-50%, -20px); opacity: 0; transition: transform 0.4s cubic-bezier(.2,.8,.2,1), opacity 0.4s; pointer-events: none; }
+  #toast.show { transform: translate(-50%, 0); opacity: 1; }
+  #toast .lbl { color: #d8b4fe; }
+  #toast b { display: block; font-size: 17px; margin: 4px 0 2px; letter-spacing: -0.02em; }
+  #toast span:last-child { font-size: 13px; color: var(--muted); }
+
+  #over { position: fixed; inset: 0; z-index: 6; display: grid; place-items: center; padding: 16px; background: rgba(8,7,11,0.45); }
+  #over .panel { width: min(420px, 100%); border-radius: 28px; padding: 28px; text-align: center; }
+  #over .big { font-size: 64px; font-weight: 700; letter-spacing: -0.05em; line-height: 1; margin-top: 10px; font-variant-numeric: tabular-nums; }
+  #over .sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  #over .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 22px 0 18px; }
+  #over .row b { display: block; font-size: 18px; margin-top: 4px; }
+  #over .gradeline { text-align: left; margin-bottom: 22px; }
+  #over .gradeline b { font-size: 14px; }
+  @media (max-width: 900px), (hover: none) { #keys { display: none; } }
+  @media (max-width: 480px) { .by span { display: none; } }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<!-- refraction map for the liquid glass (Chromium applies it to backdrop-filter) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="liquid" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="2" seed="7" result="n"/>
+    <feGaussianBlur in="n" stdDeviation="2" result="nb"/>
+    <feDisplacementMap in="SourceGraphic" in2="nb" scale="38" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<canvas id="view"></canvas>
+
+<div id="start">
+  <canvas id="bg"></canvas>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand glass"><span class="dot"></span>Limitless <small>無下限</small></div>
+      <a class="by glass" href="https://www.harshit.page" target="_blank" rel="noopener"><span>Made by </span><b>Harshit</b> ↗</a>
+    </header>
+
+    <main class="hero">
+      <div class="eyebrow glass"><i></i>Runs in your browser · no install</div>
+      <h1 class="title">Limitless</h1>
+      <div class="jp">無下限呪術</div>
+      <p class="tag">Cast Gojo's Hollow Purple and Reversal: Red with nothing but your hands and a webcam.</p>
+
+      <div class="moves">
+        <div class="move glass">
+          <div class="head"><div class="orb p"></div><span class="kanji">虚式「茈」</span></div>
+          <div>
+            <h3>Hollow Purple</h3>
+            <p>Curl your index finger onto your thumb tip, like loading a flick. Hold until it's charged, then flick open.</p>
+          </div>
+          <span class="chip">Hold ~6s · flick to fire</span>
+        </div>
+        <div class="move glass">
+          <div class="head"><div class="orb r"></div><span class="kanji">術式反転「赫」</span></div>
+          <div>
+            <h3>Reversal: Red</h3>
+            <p>Point your index finger straight up with your other fingers curled. Hold through the incantation.</p>
+          </div>
+          <span class="chip">Hold ~16s · fires on its own</span>
+        </div>
+      </div>
+
+      <div class="cta">
+        <div class="btns">
+          <button id="play" class="primary">Play Exorcism</button>
+          <button id="free" class="glass">Free cast</button>
+        </div>
+        <div id="err" role="alert"></div>
+      </div>
+
+      <section class="stats">
+        <div class="stat glass grade">
+          <span class="lbl">Sorcerer grade</span>
+          <b id="sGrade">Grade 4</b>
+          <div class="xp"><i id="sXp"></i></div>
+          <span class="sub" id="sNext"></span>
+        </div>
+        <div class="stat glass"><span class="lbl">Best score</span><b id="sBest">0</b></div>
+        <div class="stat glass"><span class="lbl">Curses exorcised</span><b id="sKills">0</b></div>
+        <details class="stat glass ach">
+          <summary><span class="lbl">Achievements</span><b id="sAch">0/8</b></summary>
+          <ul id="achList"></ul>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <span>Your video never leaves your device. Unofficial fan project, not affiliated with Jujutsu Kaisen or MAPPA.</span>
+      <a href="https://www.harshit.page" target="_blank" rel="noopener">Made by Harshit · harshit.page</a>
+    </footer>
+  </div>
+</div>
+
+<div id="hud" class="glass hidden"><div id="msg"></div><div id="bar"><i></i></div></div>
+<div id="keys" class="glass hidden">1 purple · 2 red · D debug · F fullscreen</div>
+<div id="tests" class="hidden"><button class="glass" data-k="purple">Test Purple</button><button class="glass" data-k="red">Test Red</button></div>
+<a id="credit" class="glass hidden" href="https://www.harshit.page" target="_blank" rel="noopener">Made by Harshit</a>
+<button id="menuBtn" class="glass hidden" aria-label="Back to menu">Menu</button>
+
+<div id="ghud" class="hidden">
+  <div class="gbox glass"><span class="lbl">Score</span><b id="gScore">0</b></div>
+  <div class="gbox glass mid"><span class="lbl" id="gWave">Get ready</span><div id="gLives"></div></div>
+  <div class="gbox glass"><span class="lbl" id="gGrade">Grade 4</span><div class="xp"><i id="gXp"></i></div></div>
+</div>
+
+<div id="toast" class="glass hidden">
+  <span class="lbl">Achievement unlocked</span>
+  <b id="toastName"></b>
+  <span id="toastDesc"></span>
+</div>
+
+<div id="over" class="hidden">
+  <div class="panel glass">
+    <span class="lbl">Exorcism over</span>
+    <div class="big" id="oScore">0</div>
+    <div class="sub" id="oBest"></div>
+    <div class="row">
+      <div><span class="lbl">Wave</span><b id="oWave">0</b></div>
+      <div><span class="lbl">Exorcised</span><b id="oKills">0</b></div>
+      <div><span class="lbl">Earned</span><b id="oXp">+0 XP</b></div>
+    </div>
+    <div class="gradeline"><b id="oGrade"></b><div class="xp"><i id="oBar"></i></div></div>
+    <div class="btns">
+      <button id="again" class="primary">Play again</button>
+      <button id="toMenu" class="glass">Menu</button>
+    </div>
+  </div>
+</div>
+
+<script src="landing.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
