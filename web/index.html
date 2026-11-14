@@ -150,6 +150,10 @@
   @media (max-width: 480px) { .by span { display: none; } }
   .hidden { display: none !important; }
 </style>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <!-- refraction map for the liquid glass (Chromium applies it to backdrop-filter) -->
@@ -263,9 +267,6 @@
   </div>
 </div>
 
-<!-- Vercel Web Analytics (served by Vercel once Analytics is enabled for the project) -->
-<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
-<script defer src="/_vercel/insights/script.js"></script>
 <script src="landing.js"></script>
 <script type="module" src="app.js"></script>
 </body>
